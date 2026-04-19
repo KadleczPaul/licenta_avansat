@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-4">
+            <h5 class="fw-bold text-navy mb-3"><i class="bi bi-person-plus-fill"></i> Add New Driver</h5>
+            <form action="/drivers" method="POST">
+                <div class="mb-2">
+                    <label class="small fw-bold">First Name</label>
+                    <input type="text" name="first_name" class="form-control" required>
+                </div>
+                <div class="mb-2">
+                    <label class="small fw-bold">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" required>
+                </div>
+                <div class="mb-2">
+                    <label class="small fw-bold">License Number</label>
+                    <input type="text" name="license" class="form-control" placeholder="B12345" required>
+                </div>
+                <div class="mb-2">
+                    <label class="small fw-bold">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" placeholder="07xx...">
+                </div>
+                <div class="mb-3">
+                    <label class="small fw-bold">Experience (Years)</label>
+                    <input type="number" name="exp" class="form-control" placeholder="e.g. 5" required>
+                </div>
+                <button type="submit" class="btn btn-navy w-100 fw-bold">SAVE DRIVER</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 p-4">
+            <h5 class="fw-bold text-navy mb-3">Active Personnel</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>License</th>
+                            <th>Phone</th> <th>Exp.</th>  <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in drivers %}
+                        <tr>
+                            <td class="fw-bold">{{ d.first_name }} {{ d.last_name }}</td>
+                            <td><code>{{ d.license_number }}</code></td>
+                            <td><small>{{ d.phone_number if d.phone_number else 'N/A' }}</small></td>
+                            <td><span class="badge bg-info text-dark">{{ d.experience_years }} yrs</span></td>
+                            <td>
+                                <a href="/delete_driver/{{ d.driver_id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete driver?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

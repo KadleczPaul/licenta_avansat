@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="text-navy fw-bold border-bottom pb-2">Control Tower Dashboard</h2>
+            <p class="text-secondary">System Status: <span class="badge bg-success">Operational</span> | User: <strong>{{ username }}</strong></p>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 bg-white p-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary text-white p-3 rounded-circle me-3">
+                        <i class="bi bi-geo-alt-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0">Total Locations</h6>
+                        <h3 class="fw-bold text-navy mb-0">{{ loc_count }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 bg-white p-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success text-white p-3 rounded-circle me-3">
+                        <i class="bi bi-signpost-split-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0">Network Edges</h6>
+                        <h3 class="fw-bold text-navy mb-0">{{ route_count }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 bg-white p-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning text-dark p-3 rounded-circle me-3">
+                        <i class="bi bi-cpu-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-0">Algorithm</h6>
+                        <h3 class="fw-bold text-navy mb-0">A* Ready</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0 p-4" style="background: linear-gradient(135deg, #001f3f 0%, #004080 100%); color: white;">
+                <h3>Route Planner</h3>
+                <p>Access the core optimization engine. Use A* or Dijkstra to find the most efficient paths for your fleet.</p>
+                <div class="mt-auto">
+                    <a href="/planner" class="btn btn-light fw-bold px-4">GO TO PLANNER →</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm border-0 p-4 text-center">
+                <div class="fs-1 mb-2">🚛</div>
+                <h5 class="fw-bold text-navy">Manage Fleet</h5>
+                <p class="small text-muted">Register and monitor your vehicles.</p>
+                <a href="/vehicles" class="btn btn-outline-navy btn-sm mt-auto">Open Fleet</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm border-0 p-4 text-center">
+                <div class="fs-1 mb-2">👥</div>
+                <h5 class="fw-bold text-navy">Drivers</h5>
+                <p class="small text-muted">Staff management and assignments.</p>
+                <a href="/drivers" class="btn btn-outline-navy btn-sm mt-auto">Open Personnel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-outline-navy { border: 2px solid #001f3f; color: #001f3f; font-weight: bold; }
+    .btn-outline-navy:hover { background: #001f3f; color: white; }
+</style>
+{% endblock %}

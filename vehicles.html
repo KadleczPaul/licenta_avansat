@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-4 border-top border-primary border-4">
+            <h5 class="fw-bold text-navy mb-3"><i class="bi bi-truck"></i> Add Vehicle</h5>
+            <form action="/vehicles" method="POST">
+                <div class="mb-2">
+                    <label class="small fw-bold">Plate Number</label>
+                    <input type="text" name="plate" class="form-control" placeholder="B-123-ABC" required>
+                </div>
+                <div class="mb-2">
+                    <label class="small fw-bold">Brand/Model</label>
+                    <input type="text" name="brand" class="form-control" placeholder="Volvo FH" required>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="small fw-bold">Capacity (tons)</label>
+                        <input type="number" step="0.1" name="capacity" class="form-control" required>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="small fw-bold">Fuel L/100km</label>
+                        <input type="number" step="0.1" name="fuel" class="form-control" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">ADD TO FLEET</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 p-4">
+            <h5 class="fw-bold text-navy mb-3">Vehicle Fleet Status</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Plate</th>
+                            <th>Model</th>
+                            <th>Cap.</th>
+                            <th>Fuel</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in vehicles %}
+                        <tr>
+                            <td class="fw-bold"><span class="badge bg-light text-dark border">{{ v.license_plate }}</span></td>
+                            <td>{{ v.brand }}</td>
+                            <td>{{ v.capacity_tons }} t</td>
+                            <td>{{ v.fuel_consumption_l_per_100km }} L</td>
+                            <td>
+                                <a href="/delete_vehicle/{{ v.vehicle_id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this vehicle?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Stiluri pentru Sidebar și Formular */
+    .sidebar-card { border-right: 1px solid #dee2e6; height: 100%; background: #fdfdfd; }
+    .autocomplete-results { position: absolute; z-index: 1000; width: 100%; background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none; }
+    .autocomplete-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f1f1; }
+    .autocomplete-item:hover { background-color: #f8f9fa; color: #001f3f; }
+
+    /* Stilul pentru Bara de Traseu (Roadmap) */
+    .route-container { display: flex; align-items: center; overflow-x: auto; padding: 20px 10px; margin-bottom: 30px; }
+    .route-step { display: flex; flex-direction: column; align-items: center; position: relative; min-width: 120px; }
+    .step-dot { width: 20px; height: 20px; background: #001f3f; border-radius: 50%; z-index: 2; margin-bottom: 8px; border: 4px solid #fff; box-shadow: 0 0 0 2px #001f3f; }
+    .step-line { position: absolute; top: 10px; left: 50%; width: 100%; height: 2px; background: #001f3f; z-index: 1; }
+    .route-step:last-child .step-line { display: none; }
+    .step-label { font-size: 0.85rem; font-weight: 600; color: #333; text-align: center; }
+</style>
+
+<div class="row g-0 bg-white shadow-sm rounded overflow-hidden" style="min-height: 80vh;">
+    <div class="col-md-4 sidebar-card p-4">
+        <h5 class="fw-bold text-navy mb-4 border-bottom pb-2"><i class="bi bi-gear-wide-connected"></i> Trip Configuration</h5>
+
+        <form method="POST" action="/planner">
+            <div class="mb-3 position-relative">
+                <label class="form-label small fw-bold text-secondary">Start Location</label>
+                <input type="text" id="start_name" name="start_name_visible" class="form-control form-control-sm border-2" placeholder="Ex: Bucuresti" autocomplete="off" value="{{ form_data.start_name if form_data else '' }}" required>
+                <input type="hidden" name="start_id" id="start_id" value="{{ form_data.start_id if form_data else '' }}">
+                <div id="start_results" class="autocomplete-results"></div>
+            </div>
+
+            <div class="mb-3 position-relative">
+                <label class="form-label small fw-bold text-secondary">Destination</label>
+                <input type="text" id="end_name" name="end_name_visible" class="form-control form-control-sm border-2" placeholder="Ex: Cluj-Napoca" autocomplete="off" value="{{ form_data.end_name if form_data else '' }}" required>
+                <input type="hidden" name="end_id" id="end_id" value="{{ form_data.end_id if form_data else '' }}">
+                <div id="end_results" class="autocomplete-results"></div>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-secondary">Assign Driver</label>
+                    <select name="driver_id" class="form-select form-select-sm border-2">
+                        {% for d in drivers %}
+                        <option value="{{ d.driver_id }}" {{ 'selected' if request.form.get('driver_id')|int == d.driver_id }}>{{ d.first_name }} {{ d.last_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-secondary">Assign Vehicle</label>
+                    <select name="vehicle_id" class="form-select form-select-sm border-2">
+                        {% for v in vehicles %}
+                        <option value="{{ v.vehicle_id }}" {{ 'selected' if request.form.get('vehicle_id')|int == v.vehicle_id }}>{{ v.license_plate }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-2 mb-4">
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-secondary">Algorithm</label>
+                    <select name="algorithm" class="form-select form-select-sm">
+                        <option value="astar">A* Optimization</option>
+                        <option value="dijkstra">Dijkstra</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-secondary">Load (Tons)</label>
+                    <input type="number" step="0.1" name="cargo_weight" class="form-control form-control-sm" value="12.5">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-navy w-100 fw-bold shadow-sm py-2">
+                <i class="bi bi-search me-1"></i> CALCULATE ROUTE
+            </button>
+        </form>
+    </div>
+
+    <div class="col-md-8 p-4 bg-light">
+        {% if result %}
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold text-navy mb-0">Optimization Results</h4>
+                <span class="badge bg-white text-navy border border-navy px-3 py-2">Method: {{ result.method }}</span>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm p-3 text-center">
+                        <small class="text-muted d-block mb-1">Total Distance</small>
+                        <h2 class="fw-bold text-primary mb-0">{{ result.distance }} <small>KM</small></h2>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm p-3 text-center">
+                        <small class="text-muted d-block mb-1">Estimated Time</small>
+                        <h2 class="fw-bold text-navy mb-0">{{ (result.distance / 70) | round(1) }} <small>HRS</small></h2>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-signpost-2"></i> ROADMAP VISUALIZATION</h6>
+            <div class="card border-0 shadow-sm p-4 mb-4">
+                <div class="route-container">
+                    {% for city_name in result.cities %}
+                    <div class="route-step">
+                        <div class="step-line"></div>
+                        <div class="step-dot"></div>
+                        <div class="step-label">{{ city_name }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <form action="/save_trip" method="POST">
+                <input type="hidden" name="route_id" value="{{ result.route_id }}">
+                <input type="hidden" name="driver_id" value="{{ request.form.get('driver_id') }}">
+                <input type="hidden" name="vehicle_id" value="{{ request.form.get('vehicle_id') }}">
+                <input type="hidden" name="cargo_weight" value="{{ request.form.get('cargo_weight') }}">
+
+                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow py-3">
+                    <i class="bi bi-check2-circle me-1"></i> CONFIRM & DISPATCH TRIP
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" style="width: 120px; opacity: 0.5;" alt="Map">
+            <h5 class="mt-3 fw-bold text-muted">Awaiting Input</h5>
+            <p class="text-secondary px-5">Configure the start, destination, and resources on the left to generate the most efficient logistics path.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Codul de Autocomplete ramane la fel ca inainte, doar asigura-te ca IDs se potrivesc
+function setupAutocomplete(inputId, resultsId, hiddenId) {
+    const input = document.getElementById(inputId);
+    const results = document.getElementById(resultsId);
+    const hidden = document.getElementById(hiddenId);
+
+    input.addEventListener('input', function() {
+        if (this.value.length < 2) { results.style.display = 'none'; return; }
+        fetch(`/api/search?q=${encodeURIComponent(this.value)}`)
+            .then(res => res.json())
+            .then(data => {
+                results.innerHTML = '';
+                if (data.length > 0) {
+                    results.style.display = 'block';
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'autocomplete-item';
+                        div.innerHTML = `<strong>${item.name}</strong>`;
+                        div.onclick = () => { input.value = item.name; hidden.value = item.location_id; results.style.display = 'none'; };
+                        results.appendChild(div);
+                    });
+                } else { results.style.display = 'none'; }
+            });
+    });
+}
+setupAutocomplete('start_name', 'start_results', 'start_id');
+setupAutocomplete('end_name', 'end_results', 'end_id');
+</script>
+{% endblock %}

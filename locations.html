@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-4 mb-4">
+            <h5 class="fw-bold text-navy mb-3"><i class="bi bi-geo-fill"></i> Add New City</h5>
+            <form method="POST">
+                <div class="mb-2">
+                    <label class="small fw-bold">City Name</label>
+                    <input type="text" name="name" class="form-control" required placeholder="Ex: Timisoara">
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="small fw-bold">Latitude</label>
+                        <input type="number" step="0.000001" name="latitude" class="form-control" required placeholder="45.75">
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="small fw-bold">Longitude</label>
+                        <input type="number" step="0.000001" name="longitude" class="form-control" required placeholder="21.22">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-navy w-100 fw-bold">SAVE LOCATION</button>
+            </form>
+        </div>
+
+        <div class="alert alert-info small shadow-sm">
+            <i class="bi bi-info-circle"></i> <strong>Note:</strong> Adding a city here does not automatically create routes. Run the <code>Route Generator</code> script to connect it to the network.
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 p-4">
+            <h5 class="fw-bold text-navy mb-4">Network Database Explorer</h5>
+
+            <form method="GET" action="/locations" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control border-navy"
+                           placeholder="Search for a city (e.g. 'Cluj')..."
+                           value="{{ search_query }}">
+                    <button class="btn btn-navy" type="submit">
+                        <i class="bi bi-search"></i> SEARCH
+                    </button>
+                </div>
+            </form>
+
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th>ID</th>
+                            <th>City Name</th>
+                            <th>Coordinates</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loc in locations %}
+                        <tr>
+                            <td><span class="text-muted">#{{ loc.location_id }}</span></td>
+                            <td class="fw-bold text-navy">{{ loc.name }}</td>
+                            <td>
+                                <small class="badge bg-light text-dark border">Lat: {{ loc.latitude }}</small>
+                                <small class="badge bg-light text-dark border">Lon: {{ loc.longitude }}</small>
+                            </td>
+                            <td class="text-end">
+                                <a href="/delete_location/{{ loc.location_id }}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Delete this city from the global map?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-search fs-1"></i><br>
+                                No cities found. Try searching for another name.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2 small text-muted">
+                * Showing top results. To see more, refine your search query.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
